@@ -62,7 +62,8 @@ class MainWindow : public QMainWindow
 
     void on_actionGrid_triggered();
 
-    void on_updateStatus(const QString coord);
+    void on_updateCoord(VpCoord coord);
+    void on_updateStatus(QString msg);
 
   private:
 

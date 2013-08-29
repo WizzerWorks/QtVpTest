@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QString cmd = m_vp->toString();
 
     // Listen for changes to coord values.
-    connect(m_vp, SIGNAL(coordChanged(QString)), this, SLOT(on_updateStatus(QString)));
+    connect(m_vp, SIGNAL(coordChanged(VpCoord)), this, SLOT(on_updateCoord(VpCoord)));
     connect(m_vp, SIGNAL(updateStatus(QString)), this, SLOT(on_updateStatus(QString)));
 
     m_view->init(m_vp);
@@ -226,9 +226,32 @@ void MainWindow::on_actionGrid_triggered()
     delete gridDialog;
 }
 
-void MainWindow::on_updateStatus(const QString coord)
+void MainWindow::on_updateCoord(VpCoord coord)
+{
+    static char coord_buf[100];
+
+    int scrx = coord.getX();
+    int scry = coord.getY();
+    float f_scrx = ((float) scrx)/((float) VpCoord::getResolution());
+    float f_scry = ((float) scry)/((float) VpCoord::getResolution());
+
+    QString name = coord.getName();
+    if ((name.isNull()) || (name.isEmpty())) {
+        sprintf_s(coord_buf,"(%.2lf,%.2lf)", f_scrx, f_scry);
+    } else {
+        QByteArray ba = name.toLocal8Bit();
+        sprintf_s(coord_buf,"(%.2lf,%.2lf,%s)", f_scrx, f_scry, ba.data());
+    }
+
+    //qDebug(coord.toLocal8Bit().data());
+    QString msg(coord_buf);
+    statusBar()->clearMessage();
+    statusBar()->showMessage(msg);
+}
+
+void MainWindow::on_updateStatus(QString msg)
 {
     //qDebug(coord.toLocal8Bit().data());
     statusBar()->clearMessage();
-    statusBar()->showMessage(coord);
+    statusBar()->showMessage(msg);
 }
