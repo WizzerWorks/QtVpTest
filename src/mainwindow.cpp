@@ -21,6 +21,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // COPYRIGHT_END
 
+// Include Qt header files.
+#include <QMessageBox>
+
 // Include QtVp library header files.
 #include "vputil.h"
 #include "mainwindow.h"
@@ -48,7 +51,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Listen for changes to coord values.
     connect(m_vp, SIGNAL(coordChanged(VpCoord)), this, SLOT(on_updateCoord(VpCoord)));
+    // Listen for changes to status message.
     connect(m_vp, SIGNAL(updateStatus(QString)), this, SLOT(on_updateStatus(QString)));
+    // Forward changes to new world coorinate extent.
+    connect(m_vp, SIGNAL(newExtent(QRect,QPoint)), m_view, SLOT(on_newExtent(QRect,QPoint)));
 
     m_view->init(m_vp);
 
@@ -57,6 +63,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //m_vp->resize(100, 100);
     //setCentralWidget(m_vp);
     setCentralWidget(m_view);
+
+    m_view->on_trackExtent(true);
 }
 
 MainWindow::~MainWindow()
@@ -95,6 +103,7 @@ void MainWindow::zoomIn()
 
     // Refresh the display.
     m_vp->update();
+    updateExtent();
 }
 
 void MainWindow::zoomOut()
@@ -116,6 +125,7 @@ void MainWindow::zoomOut()
 
     // Refresh the display.
     m_vp->update();
+    updateExtent();
 }
 
 void MainWindow::center()
@@ -138,6 +148,22 @@ void MainWindow::center()
 
     // Refresh the display.
     m_vp->update();
+    updateExtent();
+}
+
+void MainWindow::updateExtent()
+{
+    // Signal that a new world coordinate extent is available.
+    // This signal should be reflected in the rulers.
+    QRect extent;
+    extent.setLeft(m_vp->getWxmin());
+    extent.setRight(m_vp->getWxmax());
+    extent.setTop(m_vp->getWymin());
+    extent.setBottom(m_vp->getWymax());
+    QPoint origin;
+    origin.setX(m_vp->getGrid()->getXAlignment());
+    origin.setY(m_vp->getGrid()->getYAlignment());
+    m_vp->newExtent(extent, origin);
 }
 
 void MainWindow::on_actionAbout_triggered()

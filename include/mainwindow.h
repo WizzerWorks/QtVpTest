@@ -67,6 +67,8 @@ class MainWindow : public QMainWindow
 
   private:
 
+    void updateExtent();
+
     Ui::MainWindow *m_ui;
     VpGraphicsView *m_view;
     VpGraphics2D *m_vp;
